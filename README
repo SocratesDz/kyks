@@ -1,5 +1,3 @@
-Este es un repositorio creado para realizar el juego del 2do cuatrimestre.
+Para clonar este repositorio utilice este comando:
 
-Para obtener los archivos realiza este comando:
-
-git clone https://github.com/SocratesDz/kyks
+git-clone https://github.com/SocratesDz/kyks.git
