@@ -4,8 +4,8 @@ Basado en los tutoriales de Coding Made Easy.
 
 Para el grupo KYKS
 
-Nota: para compilar debe usarse la opción "-lallegro -lallegro_dialog" en el compilador 
-
+Nota: para compilar debe usarse la opción "-lallegro -lallegro_dialog" en el compilador.
+Para más información lea el manual de Allegro 5, o pregunte en los issues
 */
 
 #include <allegro5/allegro.h>	// Incluye la librería de Allegro
