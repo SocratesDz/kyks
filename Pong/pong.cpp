@@ -98,13 +98,16 @@ int main()
 	bola.moveSpeedX = 5.0;	// Y se mueve a 5 píxeles por segundo
 	bola.moveSpeedY = 5.0;
 
+	// Hacemos lo anterior para hacer el jugador
 	struct Palito
 	{
-		float x1;
-		float y1;
-		float x2;
+		// Un rectángulo se dibuja
+
+		float x1;	// desde el punto x1, y1 (esquina superior izquierda)
+		float y1;	
+		float x2;	// hasta el punto x2, y2 (esquina inferior derecha)
 		float y2;
-		float moveSpeedY;
+		float moveSpeedY; // defino la velocidad en el eje y
 		ALLEGRO_COLOR color;
 	}palito;
 
@@ -127,7 +130,9 @@ int main()
 		ALLEGRO_EVENT events;	// Crea una variable de eventos
 
 		// Espera por un evento para mandarlo a la variable de eventos
-		al_wait_for_event(eventQueue, &events);	
+		al_wait_for_event(eventQueue, &events);
+
+		// Hasta aquí me confundo, pero después de esta línea no
 
 		// Si el tipo de eventos es del temporizador de eventos
 		// Lo que está dentro de este temporizador ocurre en tiempo real
@@ -135,32 +140,38 @@ int main()
 		{
 			// En esta condición es donde ocurre la acción
 
+			// Obtiene el estado del teclado
 			al_get_keyboard_state(&keyState);
 
+			// Si se presiona la tecla ESCAPE
 			if(al_key_down(&keyState, ALLEGRO_KEY_ESCAPE))
-				done = true;
+				done = true;	// entonces el programa se cierra
 
+			// Si se presiona la tecla abajo
 			if(al_key_down(&keyState, ALLEGRO_KEY_DOWN))
 			{
+				// Si la posición 'y' del jugador es menor que el ancho de la pantalla
 				if(palito.y2 <= ScreenHeight)
 				{
+					// Entonces se mueve hacia abajo
 					palito.y1 += palito.moveSpeedY;
 					palito.y2 += palito.moveSpeedY;	
 				}
 					
 			}
+
+			// Si se presiona la tecla arriba
 			if(al_key_down(&keyState, ALLEGRO_KEY_UP))
 			{	
+				// Si la posición 'y' del jugador es mayor que 0 (la parte superior de la pantalla)
 				if(palito.y1 >= 0)
 				{
+					// Entonces se mueve hacia arriba
 					palito.y1 -= palito.moveSpeedY;
 					palito.y2 -= palito.moveSpeedY;	
 				}
 				
 			}
-
-			//if(palito.y1 == 0 || palito.y2 == ScreenHeight) palito.moveSpeedY *= 0;
-
 
 			// La bola se mueve 'n' píxeles por segundo en el eje 'x' y 'y'
 			bola.x += bola.moveSpeedX;
