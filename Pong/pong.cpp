@@ -6,6 +6,9 @@ Un juego que simula una partida de ping pong
 
 Autor: Sócrates Díaz
 Fecha: 21/09/2012
+
+Nota: Para compilar se debe utilizar como opción en el compilador
+	 -lallegro -lallegro_dialog -lallegro_primitives
 */
 
 
