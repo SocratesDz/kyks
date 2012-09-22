@@ -98,6 +98,23 @@ int main()
 	bola.moveSpeedX = 5.0;	// Y se mueve a 5 píxeles por segundo
 	bola.moveSpeedY = 5.0;
 
+	struct Palito
+	{
+		float x1;
+		float y1;
+		float x2;
+		float y2;
+		float moveSpeedY;
+		ALLEGRO_COLOR color;
+	}palito;
+
+	palito.x1 = 15;
+	palito.y1 = palito.x1;
+	palito.x2 = 25;
+	palito.y2 = 55;
+	palito.moveSpeedY = 5.0;
+	palito.color = white;
+
 
 	/************************** Principio del juego *******************************/
 
@@ -112,22 +129,38 @@ int main()
 		// Espera por un evento para mandarlo a la variable de eventos
 		al_wait_for_event(eventQueue, &events);	
 
-		// Si el tipo de eventos es presionar una tecla hacia abajo
-		if(events.type == ALLEGRO_EVENT_KEY_DOWN) 
-		{
-			// Hace un switch para los códigos de las teclas del teclado ¿wtf?
-			switch(events.keyboard.keycode)	
-			{
-				case ALLEGRO_KEY_ESCAPE:	// En caso de presionar la tecla escape
-					done = true;			// el juego finaliza
-			}
-
-		}
-
 		// Si el tipo de eventos es del temporizador de eventos
-		else if(events.type == ALLEGRO_EVENT_TIMER)
+		// Lo que está dentro de este temporizador ocurre en tiempo real
+		if(events.type == ALLEGRO_EVENT_TIMER)
 		{
 			// En esta condición es donde ocurre la acción
+
+			al_get_keyboard_state(&keyState);
+
+			if(al_key_down(&keyState, ALLEGRO_KEY_ESCAPE))
+				done = true;
+
+			if(al_key_down(&keyState, ALLEGRO_KEY_DOWN))
+			{
+				if(palito.y2 <= ScreenHeight)
+				{
+					palito.y1 += palito.moveSpeedY;
+					palito.y2 += palito.moveSpeedY;	
+				}
+					
+			}
+			if(al_key_down(&keyState, ALLEGRO_KEY_UP))
+			{	
+				if(palito.y1 >= 0)
+				{
+					palito.y1 -= palito.moveSpeedY;
+					palito.y2 -= palito.moveSpeedY;	
+				}
+				
+			}
+
+			//if(palito.y1 == 0 || palito.y2 == ScreenHeight) palito.moveSpeedY *= 0;
+
 
 			// La bola se mueve 'n' píxeles por segundo en el eje 'x' y 'y'
 			bola.x += bola.moveSpeedX;
@@ -143,6 +176,9 @@ int main()
 
 		// Dibujo un círculo (quería un cuadrado pero no me funcionaba)
 		al_draw_filled_circle(bola.x, bola.y, bola.radius, bola.color);
+
+		// Dibujo un rectángulo (espero que esta vez funcione)
+		al_draw_filled_rectangle(palito.x1, palito.y1, palito.x2, palito.y2, palito.color);
 
 		// Copio todo lo dibujado a la pantalla
 		al_flip_display();
