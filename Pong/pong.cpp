@@ -36,35 +36,51 @@ int main()
 		return -1;
 	}
 	
-	al_set_new_display_flags(ALLEGRO_WINDOWED);
+	al_set_new_display_flags(ALLEGRO_WINDOWED); // Pone la ventana en modo Windowed
 	ALLEGRO_DISPLAY *display = al_create_display(ScreenWidth, ScreenHeight);
+
+	// Pone la posición en la que debe salir la ventana
 	al_set_window_position(display, 0, 0);
+
+	// Pone el título de la ventana
 	al_set_window_title(display, "Pong");
 
-	if(!display)
+	if(!display)	// Si no se pudo crear la ventana, entonces pone un mensaje de error
 	{
 		al_show_native_message_box(NULL, "Error", NULL, "No se pudo crear la pantalla", NULL, ALLEGRO_MESSAGEBOX_ERROR);
 		return -1;
 	}
 
-	al_set_window_position(display, 0, 0);
-
 	/************************** Creamos algunas variables para el juego ************/
 
-	al_install_keyboard();
-	al_init_primitives_addon();
+	al_install_keyboard();	// Inicializa el teclado
+	al_init_primitives_addon();	// Inicializa el addon de las formas primitivas
 
+	// Creo una variable que almacene el color blanco
 	ALLEGRO_COLOR white = al_map_rgb(255, 255, 255);
+
+	// No me gusta realizar los siguientes pasos, me confunden
 	
+	// Crea una variable para almacenar el estado de las teclas
 	ALLEGRO_KEYBOARD_STATE keyState;
+
+	// Crea un temporizador que va a 60 FPS
 	ALLEGRO_TIMER *timer = al_create_timer(1.0/FPS);
+
+	// Crea una variable que almacena la lista de eventos
 	ALLEGRO_EVENT_QUEUE *eventQueue = al_create_event_queue();
-	al_register_event_source(eventQueue, al_get_keyboard_event_source());
-	al_register_event_source(eventQueue, al_get_timer_event_source(timer));
-	al_register_event_source(eventQueue, al_get_display_event_source(display));
+
+	// Registra la fuente de donde va a sacar los eventos de...
+	al_register_event_source(eventQueue, al_get_keyboard_event_source());	// El teclado
+	al_register_event_source(eventQueue, al_get_timer_event_source(timer));	// El temporizador
+	al_register_event_source(eventQueue, al_get_display_event_source(display));	// La pantalla
  
+ 	// De aquí en adelante no me confunde :)
+
+ 	// Crea una variable para el loop principal
 	bool done = false;
 	
+	// Defino una estructura (próximamente será una clase)
 	struct Bola
 	{
 		float x;
@@ -75,47 +91,64 @@ int main()
 		ALLEGRO_COLOR color;
 	}bola;
 
-	bola.x = ScreenWidth/2;
+	bola.x = ScreenWidth/2; // La ponemos a mitad de la pantalla
 	bola.y = ScreenHeight/2;
-	bola.radius = 5.0;
-	bola.color = white;
-	bola.moveSpeedX = 5.0;
+	bola.radius = 5.0;	// La bola tiene un radio de 5 píxeles
+	bola.color = white;	// Es color blanca
+	bola.moveSpeedX = 5.0;	// Y se mueve a 5 píxeles por segundo
 	bola.moveSpeedY = 5.0;
 
 
 	/************************** Principio del juego *******************************/
 
-	al_start_timer(timer);
+	al_start_timer(timer);	// Pone el temporizador a correr
 
 	while(!done)
 	{
+		// Aquí me vuelvo a confundir
 
-		ALLEGRO_EVENT events;
-		al_wait_for_event(eventQueue, &events);
+		ALLEGRO_EVENT events;	// Crea una variable de eventos
 
-		if(events.type == ALLEGRO_EVENT_KEY_DOWN)
+		// Espera por un evento para mandarlo a la variable de eventos
+		al_wait_for_event(eventQueue, &events);	
+
+		// Si el tipo de eventos es presionar una tecla hacia abajo
+		if(events.type == ALLEGRO_EVENT_KEY_DOWN) 
 		{
-			switch(events.keyboard.keycode)
+			// Hace un switch para los códigos de las teclas del teclado ¿wtf?
+			switch(events.keyboard.keycode)	
 			{
-				case ALLEGRO_KEY_ESCAPE:
-					done = true;
+				case ALLEGRO_KEY_ESCAPE:	// En caso de presionar la tecla escape
+					done = true;			// el juego finaliza
 			}
 
 		}
+
+		// Si el tipo de eventos es del temporizador de eventos
 		else if(events.type == ALLEGRO_EVENT_TIMER)
 		{
+			// En esta condición es donde ocurre la acción
+
+			// La bola se mueve 'n' píxeles por segundo en el eje 'x' y 'y'
 			bola.x += bola.moveSpeedX;
 			bola.y += bola.moveSpeedY;
 
+			// Si la bola toca los bordes de la pantalla, entonces su velocidad se vuelve negativa
+			// por lo que su dirección se vuelve contraria
 			if(bola.x == ScreenWidth || bola.x == 0) bola.moveSpeedX *= -1;
 			if(bola.y == ScreenHeight || bola.y == 0) bola.moveSpeedY *= -1;
 		}
 
-		al_clear_to_color(al_map_rgb(0, 0, 0));
+		al_clear_to_color(al_map_rgb(0, 0, 0));	// Pinto de negro la pantalla
+
+		// Dibujo un círculo (quería un cuadrado pero no me funcionaba)
 		al_draw_filled_circle(bola.x, bola.y, bola.radius, bola.color);
+
+		// Copio todo lo dibujado a la pantalla
 		al_flip_display();
 	}
 
+	// Recojo la basura
 	al_destroy_display(display);
 	al_destroy_event_queue(eventQueue);
 	al_destroy_timer(timer);
