@@ -41,6 +41,8 @@ int main()
 	al_init_image_addon();
 
 	ALLEGRO_BITMAP *image = al_load_bitmap("sprites/mario.png");
+	ALLEGRO_BITMAP *mario = al_create_sub_bitmap(image, 3, 603, 16, 21);
+
 	ALLEGRO_KEYBOARD_STATE estadoTeclado;
 	ALLEGRO_TIMER *timer = al_create_timer(1.0/FPS);
 	ALLEGRO_EVENT_QUEUE *listaEventos = al_create_event_queue();
@@ -56,6 +58,16 @@ int main()
 	float velocidad = 8.0;
 	float x = AnchoPantalla/2, y = AltoPantalla/2;
 	int right = 0;
+
+	ALLEGRO_BITMAP *armas = al_load_bitmap("sprites/weapons2.jpg");
+	ALLEGRO_BITMAP *arma1 = al_create_sub_bitmap(armas, 196, 214, 29, 20);
+	al_convert_mask_to_alpha(arma1, al_map_rgb(255,255,255));
+
+	if(!armas)	// Si no se pudo crear la ventana, entonces pone un mensaje de error
+	{
+		al_show_native_message_box(NULL, "Error", NULL, "No se pudo crear la pantalla", NULL, ALLEGRO_MESSAGEBOX_ERROR);
+		return -1;
+	}
 
 	al_start_timer(timer);
 
@@ -99,19 +111,24 @@ int main()
 				y += velocidad;
 
 		if(x <= 0) x = 0;
-		if(x+16 >= AnchoPantalla) x = AnchoPantalla-16;
+		if(x+32 >= AnchoPantalla) x = AnchoPantalla-32;
 		if(y <= 0) y = 0;
 		y += gravedad;
-		if(y+21 >= AltoPantalla) y = AltoPantalla-21;
+		if(y+42 >= AltoPantalla) y = AltoPantalla-42;
 
 		}
 
 		al_clear_to_color(al_map_rgb(0, 0, 0));
-		al_draw_bitmap_region(image, 3, 603, 16, 21, x, y, right);
+		al_draw_scaled_bitmap(mario, 0, 0, 16, 21, x, y, 32, 42, right);
+		al_draw_bitmap(arma1, x, y+15, right);
+
 		al_flip_display();
 	}
 
 	al_destroy_bitmap(image);
+	al_destroy_bitmap(mario);
+	al_destroy_bitmap(armas);
+	al_destroy_bitmap(arma1);
 	al_destroy_event_queue(listaEventos);
 	al_destroy_display(display);
 	al_destroy_timer(timer);
