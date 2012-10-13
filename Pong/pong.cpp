@@ -181,6 +181,13 @@ int main()
 			// por lo que su dirección se vuelve contraria
 			if(bola.x == ScreenWidth || bola.x == 0) bola.moveSpeedX *= -1;
 			if(bola.y == ScreenHeight || bola.y == 0) bola.moveSpeedY *= -1;
+			
+			// Vamos a detectar colisiones
+			if(bola.y > palito.y1 && bola.y < palito.y2)
+			{
+				if(bola.x < palito.x1+palito.x2)
+					bola.moveSpeedX *= -1;
+			}
 		}
 
 		al_clear_to_color(al_map_rgb(0, 0, 0));	// Pinto de negro la pantalla
