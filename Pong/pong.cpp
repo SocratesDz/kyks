@@ -120,9 +120,9 @@ int main()
 
 	// Aqui se hace el jugador 2 (o la máquina)
 	ai.x1 = ScreenWidth - 25;
-	ai.y1 = 15;
+	ai.y1 = ScreenHeight/2;
 	ai.x2 = ScreenWidth - 15;
-	ai.y2 = 55;
+	ai.y2 = (ScreenHeight/2)+40;
 	ai.moveSpeedY = 5.0;
 	ai.color = white;
 
@@ -225,7 +225,7 @@ int main()
 			}
 			if(bola.y > ai.y1 && bola.y < ai.y2)
 			{
-				if(bola.x > ai.x1 + ai.x2)
+				if(bola.x > ai.x1)
 					bola.moveSpeedX *= -1;
 			}
 		}
