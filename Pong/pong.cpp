@@ -109,7 +109,7 @@ int main()
 		float y2;
 		float moveSpeedY; // defino la velocidad en el eje y
 		ALLEGRO_COLOR color;
-	}palito;
+	}palito, ai;
 
 	palito.x1 = 15;
 	palito.y1 = palito.x1;
@@ -118,6 +118,13 @@ int main()
 	palito.moveSpeedY = 5.0;
 	palito.color = white;
 
+	// Aqui se hace el jugador 2 (o la máquina)
+	ai.x1 = ScreenWidth - 25;
+	ai.y1 = 15;
+	ai.x2 = ScreenWidth - 15;
+	ai.y2 = 55;
+	ai.moveSpeedY = 5.0;
+	ai.color = white;
 
 	/************************** Principio del juego *******************************/
 
@@ -150,7 +157,7 @@ int main()
 			// Si se presiona la tecla abajo
 			if(al_key_down(&keyState, ALLEGRO_KEY_DOWN))
 			{
-				// Si la posición 'y' del jugador es menor que el ancho de la pantalla
+				// Si la posición 'y' del jugador es menor que el alto de la pantalla
 				if(palito.y2 <= ScreenHeight)
 				{
 					// Entonces se mueve hacia abajo
@@ -168,7 +175,7 @@ int main()
 				{
 					// Entonces se mueve hacia arriba
 					palito.y1 -= palito.moveSpeedY;
-					palito.y2 -= palito.moveSpeedY;	
+					palito.y2 -= palito.moveSpeedY;
 				}
 				
 			}
@@ -182,10 +189,43 @@ int main()
 			if(bola.x == ScreenWidth || bola.x == 0) bola.moveSpeedX *= -1;
 			if(bola.y == ScreenHeight || bola.y == 0) bola.moveSpeedY *= -1;
 			
-			// Vamos a detectar colisiones
+			// Es hora de hacer un poco de Inteligencia Artificial :D
+			if(ai.y1 >= 0)
+			{
+				ai.y1 -= ai.moveSpeedY;
+				ai.y2 -= ai.moveSpeedY;
+			}
+			if(ai.y2 <= ScreenHeight)
+			{
+				ai.y2 += ai.moveSpeedY;
+				ai.y1 += ai.moveSpeedY;
+			}
+			
+			// Esto detecta si la bola está a mitad de la pantalla para que la máquina actúe en consecuencia
+			if(bola.x >= ScreenWidth/2)
+			{
+				if((ai.y1 + ai.y2)/2 < bola.y)
+				{
+					ai.y1 += ai.moveSpeedY;
+					ai.y2 += ai.moveSpeedY;
+				}
+				if((ai.y1 + ai.y2)/2 > bola.y)
+				{
+					ai.y1 += ai.moveSpeedY*-1;
+					ai.y2 += ai.moveSpeedY*-1;
+				}
+				
+			}
+			
+			// Vamos a detectar las colisiones de la bola
 			if(bola.y > palito.y1 && bola.y < palito.y2)
 			{
 				if(bola.x < palito.x1+palito.x2)
+					bola.moveSpeedX *= -1;
+			}
+			if(bola.y > ai.y1 && bola.y < ai.y2)
+			{
+				if(bola.x > ai.x1 + ai.x2)
 					bola.moveSpeedX *= -1;
 			}
 		}
@@ -197,6 +237,9 @@ int main()
 
 		// Dibujo un rectángulo (espero que esta vez funcione)
 		al_draw_filled_rectangle(palito.x1, palito.y1, palito.x2, palito.y2, palito.color);
+		
+		// Dibujo al jugador 2
+		al_draw_filled_rectangle(ai.x1, ai.y1, ai.x2, ai.y2, ai.color);
 
 		// Copio todo lo dibujado a la pantalla
 		al_flip_display();
