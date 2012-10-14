@@ -231,6 +231,12 @@ int main()
 		}
 
 		al_clear_to_color(al_map_rgb(0, 0, 0));	// Pinto de negro la pantalla
+		
+		// Dibujemos una línea divisora del campo
+		for(float i = 0; i < ScreenHeight/10; i+=10)
+		{
+			al_draw_filled_rectangle(ScreenWidth/2, (i+0.5)*10, (ScreenWidth/2)+10, ((i+0.5)*10)+70, white);
+		} // Es rebuscado lo sé, pero funciona, solo hay que analizar un poco
 
 		// Dibujo un círculo (quería un cuadrado pero no me funcionaba)
 		al_draw_filled_circle(bola.x, bola.y, bola.radius, bola.color);
