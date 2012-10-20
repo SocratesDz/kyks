@@ -48,6 +48,8 @@ int main()
 	al_init_font_addon();
 	al_init_ttf_addon();
 
+	// -----------------------------------------------------------------
+
 	ALLEGRO_EVENT_QUEUE *event_queue = al_create_event_queue();
 	ALLEGRO_TIMER *timer = al_create_timer(1.0/FPS);
 	ALLEGRO_KEYBOARD_STATE keyState;
@@ -60,6 +62,8 @@ int main()
 	//al_convert_mask_to_alpha(player, al_map_rgb(255,255,255));
 	
 	bool done = false;
+
+	// -----------------------------------------------------------------
 
 	struct Player
 	{
@@ -109,7 +113,7 @@ int main()
     robot.velocidad_x = 1;
     robot.velocidad_y = 1;
     
-	// --------------------------------------------------------------------------
+	// -----------------------------------------------------------------
 
 	ALLEGRO_MOUSE_STATE mouseState;
 	
@@ -175,19 +179,22 @@ int main()
 		al_clear_to_color(al_map_rgb(255, 255, 255));
        	al_draw_scaled_bitmap(fondo1,0, 0, 256, 256, 0, 0, ScreenWidth, ScreenHeight, 0);
 		if(player.alive){
-			al_draw_rotated_bitmap(player.image, 25, 25, player.x, player.y, acos((player.xmouse-player.x)/(player.ymouse-player.y)), 0);
+			al_draw_rotated_bitmap(player.image, 25, 25, player.x, player.y, player.degrees, 0);
 			al_draw_rotated_bitmap(bala.image, 10, 20, player.x+5, player.y+5, player.degrees, 0);
         }
         al_draw_bitmap(robot.image, robot.x, robot.y, 0);
         	
-        al_draw_textf(font, al_map_rgb(255,255,255), ScreenHeight-10*5, 2, ALLEGRO_ALIGN_RIGHT, "Player x, y : %.1f %.1f", player.x, player.y);
-		al_draw_textf(font, al_map_rgb(255,255,255), ScreenHeight-10*5, 12, ALLEGRO_ALIGN_RIGHT, "Degrees (with keyboard): %.5f", player.degrees);
-		al_draw_textf(font, al_map_rgb(255,255,255), ScreenHeight-10*5, 22, ALLEGRO_ALIGN_RIGHT, "Degrees (with mouse): %.5f", acos((player.xmouse-player.x)/(player.ymouse-player.y)));
+        al_draw_textf(font, al_map_rgb(255,255,255), ScreenWidth-10, 2, ALLEGRO_ALIGN_RIGHT, "Player x, y : %.1f %.1f", player.x, player.y);
+		al_draw_textf(font, al_map_rgb(255,255,255), ScreenWidth-10, 12, ALLEGRO_ALIGN_RIGHT, "Degrees (with keyboard): %.5f", player.degrees);
+		//al_draw_textf(font, al_map_rgb(255,255,255), ScreenHeight-10*5, 22, ALLEGRO_ALIGN_RIGHT, "Degrees (with mouse): %.5f", acos((player.xmouse-player.x)/(player.ymouse-player.y)));
 		
 		al_flip_display();
 		
 		
 	}
+	
+	//-----After party (hay que limpiar)--------------------------------
+	
 	al_destroy_font(font);
 	al_destroy_bitmap(fondo1);
 	al_destroy_display(display);
@@ -198,6 +205,7 @@ int main()
 	return 0;
 }
 
+// Funciones -----------------------------------------------------------
 
 bool Collision(float x, float y, float w, float h, float ex, float ey, float ew, float eh)
 {
