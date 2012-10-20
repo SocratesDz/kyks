@@ -1,6 +1,8 @@
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_native_dialog.h>
 #include <allegro5/allegro_image.h>
+#include <allegro5/allegro_font.h>
+#include <allegro5/allegro_ttf.h>
 #include <cmath>
 #include <iostream>
 
@@ -43,25 +45,40 @@ int main()
 	al_install_keyboard();
 	al_install_mouse();
 	al_init_image_addon();
+	al_init_font_addon();
+	al_init_ttf_addon();
 
 	ALLEGRO_EVENT_QUEUE *event_queue = al_create_event_queue();
 	ALLEGRO_TIMER *timer = al_create_timer(1.0/FPS);
 	ALLEGRO_KEYBOARD_STATE keyState;
 
+	// Utilizado para debugging
+	ALLEGRO_FONT *font = al_load_font("sprites/DroidSans.ttf", 10, 0);
 
-	ALLEGRO_BITMAP *player = al_load_bitmap("sprites/player.png");
+	
 	ALLEGRO_BITMAP *fondo1 = al_load_bitmap("sprites/fondo1.png");
 	//al_convert_mask_to_alpha(player, al_map_rgb(255,255,255));
 	
-
 	bool done = false;
-	int x = ScreenWidth / 2;
-	int y = ScreenHeight / 2;
-	int moveSpeed = 3;
-	float degrees = ALLEGRO_PI/2;
-   	bool alive = true;
-	float xmouse;
-	float ymouse;
+
+	struct Player
+	{
+ 		ALLEGRO_BITMAP *image;
+		float x;
+		float y;
+		float moveSpeed;
+		float degrees;
+		bool alive;
+		float xmouse;
+		float ymouse;
+	}player;
+	
+	player.image = al_load_bitmap("sprites/player.png");
+	player.x = ScreenWidth / 2;
+	player.y = ScreenHeight / 2;
+	player.moveSpeed = 3;
+	player.degrees = ALLEGRO_PI/2;
+   	player.alive = true;
 
 	struct Bala
 	{
@@ -73,8 +90,8 @@ int main()
 	
 	
 	bala.image = al_load_bitmap("sprites/bullet.png");
-	bala.x = x+43;
-	bala.y = y+9;
+	bala.x = player.x+43;
+	bala.y = player.y+9;
 	
 	struct Enemigo
     	{
@@ -83,14 +100,14 @@ int main()
             float y;
             float velocidad_x;
             float velocidad_y;
-    	}robot;
+    }robot;
 
-    	robot.image = al_load_bitmap("sprites/enemigo.jpg");
+    robot.image = al_load_bitmap("sprites/enemigo.jpg");
 	//al_convert_mask_to_alpha(robot.image, al_map_rgb(255,255,255));
-    	robot.x = 50;
-    	robot.y = 50;
-    	robot.velocidad_x = 1;
-    	robot.velocidad_y = 1;
+    robot.x = 50;
+    robot.y = 50;
+    robot.velocidad_x = 1;
+    robot.velocidad_y = 1;
     
 	// --------------------------------------------------------------------------
 
@@ -114,8 +131,8 @@ int main()
 			al_get_keyboard_state(&keyState);
 			al_get_mouse_state(&mouseState);
 			
-			xmouse = al_get_mouse_state_axis(&mouseState, 0);
-			ymouse = al_get_mouse_state_axis(&mouseState, 1);
+			player.xmouse = al_get_mouse_state_axis(&mouseState, 0);
+			player.ymouse = al_get_mouse_state_axis(&mouseState, 1);
 
 			if(al_key_down(&keyState, ALLEGRO_KEY_ESCAPE))
 			{
@@ -123,27 +140,27 @@ int main()
 			}
 			if(al_key_down(&keyState, ALLEGRO_KEY_A))
 			{
-				x -= moveSpeed;
+				player.x -= player.moveSpeed;
 			}
 			if(al_key_down(&keyState, ALLEGRO_KEY_D))
 			{
-				x += moveSpeed;
+				player.x += player.moveSpeed;
 			}
 			if(al_key_down(&keyState, ALLEGRO_KEY_W))
 			{
-				y -= moveSpeed;
+				player.y -= player.moveSpeed;
 			}
 			if(al_key_down(&keyState, ALLEGRO_KEY_S))
 			{
-				y += moveSpeed;
+				player.y += player.moveSpeed;
 			}
 			if(al_key_down(&keyState, ALLEGRO_KEY_Q))
 			{
-				degrees-=0.1;
+				player.degrees-=0.1;
 			}
 			if(al_key_down(&keyState, ALLEGRO_KEY_E))
 			{
-				degrees+=0.1;
+				player.degrees+=0.1;
 			}
 					
 		}
@@ -153,25 +170,29 @@ int main()
 // 		if(robot.y > y) robot.y -= robot.velocidad_y;
 // 		if(robot.y < y) robot.y += robot.velocidad_y;
 		
-		if(Collision(x, y, 60, 52, robot.x, robot.y, 50, 50)) alive = false;
+		if(Collision(player.x, player.y, 60, 52, robot.x, robot.y, 50, 50)) player.alive = false;
 
 		al_clear_to_color(al_map_rgb(255, 255, 255));
-       		al_draw_scaled_bitmap(fondo1,0, 0, 256, 256, 0, 0, ScreenWidth, ScreenHeight, 0);
-		if(alive){
-                  al_draw_rotated_bitmap(player, 25, 25, x, y, degrees, 0);
-		  al_draw_rotated_bitmap(bala.image, 10, 20, x+5, y+5, degrees, 0);
-                }
-        	al_draw_bitmap(robot.image, robot.x, robot.y, 0);
+       	al_draw_scaled_bitmap(fondo1,0, 0, 256, 256, 0, 0, ScreenWidth, ScreenHeight, 0);
+		if(player.alive){
+			al_draw_rotated_bitmap(player.image, 25, 25, player.x, player.y, acos((player.xmouse-player.x)/(player.ymouse-player.y)), 0);
+			al_draw_rotated_bitmap(bala.image, 10, 20, player.x+5, player.y+5, player.degrees, 0);
+        }
+        al_draw_bitmap(robot.image, robot.x, robot.y, 0);
+        	
+        al_draw_textf(font, al_map_rgb(255,255,255), ScreenHeight-10*5, 2, ALLEGRO_ALIGN_RIGHT, "Player x, y : %.1f %.1f", player.x, player.y);
+		al_draw_textf(font, al_map_rgb(255,255,255), ScreenHeight-10*5, 12, ALLEGRO_ALIGN_RIGHT, "Degrees (with keyboard): %.5f", player.degrees);
+		al_draw_textf(font, al_map_rgb(255,255,255), ScreenHeight-10*5, 22, ALLEGRO_ALIGN_RIGHT, "Degrees (with mouse): %.5f", acos((player.xmouse-player.x)/(player.ymouse-player.y)));
+		
 		al_flip_display();
 		
-		std::cout << "Player x , y : " << x << " " << y << std::endl;
-		std::cout << "Degrees (with keyboard): " << degrees << std::endl;
-		std::cout << "Degrees (with mouse): " << acos((xmouse-x)/(ymouse-y)) << std::endl;
+		
 	}
+	al_destroy_font(font);
 	al_destroy_bitmap(fondo1);
 	al_destroy_display(display);
 	al_destroy_event_queue(event_queue);
-	al_destroy_bitmap(player);
+	al_destroy_bitmap(player.image);
 	al_destroy_timer(timer);
 
 	return 0;
