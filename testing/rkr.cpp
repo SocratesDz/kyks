@@ -15,10 +15,7 @@ bool Collision(float x, float y, float w, float h, float ex, float ey, float ew,
 
 
 int main()
-
-{
-
-          
+{          
 	const float FPS = 60.0;
 
 	if(!al_init())
@@ -63,7 +60,7 @@ int main()
 	
 	bool done = false;
 
-	// -----------------------------------------------------------------
+	// ---------Estructuras del juego-----------------------------------
 
 	struct Player
 	{
@@ -172,12 +169,12 @@ int main()
 		player.degrees = atan2((player.ymouse-player.y),(player.xmouse-player.x));
 				
 		
-// 		if(robot.x < x) robot.x += robot.velocidad_x;
-// 		if(robot.x > x) robot.x -= robot.velocidad_x;
-// 		if(robot.y > y) robot.y -= robot.velocidad_y;
-// 		if(robot.y < y) robot.y += robot.velocidad_y;
+ 		if(robot.x < player.x) robot.x += robot.velocidad_x;
+ 		if(robot.x > player.x) robot.x -= robot.velocidad_x;
+ 		if(robot.y > player.y) robot.y -= robot.velocidad_y;
+ 		if(robot.y < player.y) robot.y += robot.velocidad_y;
 		
-		if(Collision(player.x, player.y, 60, 52, robot.x, robot.y, 50, 50)) player.alive = false;
+		if(Collision(player.x, player.y, 50, 50, robot.x, robot.y, 34, 34)) player.alive = false;
 
 		al_clear_to_color(al_map_rgb(255, 255, 255));
        	al_draw_scaled_bitmap(fondo1,0, 0, 256, 256, 0, 0, ScreenWidth, ScreenHeight, 0);
@@ -212,8 +209,13 @@ int main()
 
 bool Collision(float x, float y, float w, float h, float ex, float ey, float ew, float eh)
 {
-     if((x <= (ex+ew) && (y >= ey && y <= (ey+eh))) || ((x+w) >= ex && (y >= ey && y <= (ey + eh)))
-	     || (y <= (ey+eh) && (x >= ex && x <= (ex+ew))) || ((y+h) >= ey && (x >= ex && x <= (ex+ew))))
-             return true;
-     return false; 
+     //~ if((x <= (ex+ew) && (y <= ey && y >= (ey+eh))) || ((x+w) >= ex && (y <= ey && y >= (ey + eh)))
+	     //~ || (y <= (ey+eh) && (x >= ex && x <= (ex+ew))) || ((y+h) >= ey && (x >= ex && x <= (ex+ew))))
+             //~ return true;
+     //~ else
+		//~ return false;
+		
+	if(x+w < ex || x > ex + ew || y + h > ey || y > ey+eh)
+		return false;
+	return true;
 }
