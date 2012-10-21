@@ -31,7 +31,7 @@ int main()
 	ALLEGRO_DISPLAY *display = al_create_display(ScreenWidth, ScreenHeight);
 
 	// Pone la posición en la que debe salir la ventana
-	al_set_window_position(display, 0, 0);
+	al_set_window_position(display, 0, 30);
 
 	// Pone el título de la ventana
 	al_set_window_title(display, "juego!");
@@ -81,7 +81,7 @@ int main()
 	player.x = ScreenWidth / 2;
 	player.y = ScreenHeight / 2;
 	player.moveSpeed = 3;
-	player.degrees = ALLEGRO_PI/2;
+	player.degrees = -ALLEGRO_PI/2;
    	player.alive = true;
 
 	struct Bala
@@ -169,6 +169,9 @@ int main()
 					
 		}
 		
+		player.degrees = atan2((player.ymouse-player.y),(player.xmouse-player.x));
+				
+		
 // 		if(robot.x < x) robot.x += robot.velocidad_x;
 // 		if(robot.x > x) robot.x -= robot.velocidad_x;
 // 		if(robot.y > y) robot.y -= robot.velocidad_y;
@@ -185,7 +188,7 @@ int main()
         al_draw_bitmap(robot.image, robot.x, robot.y, 0);
         	
         al_draw_textf(font, al_map_rgb(255,255,255), ScreenWidth-10, 2, ALLEGRO_ALIGN_RIGHT, "Player x, y : %.1f %.1f", player.x, player.y);
-		al_draw_textf(font, al_map_rgb(255,255,255), ScreenWidth-10, 12, ALLEGRO_ALIGN_RIGHT, "Degrees (with keyboard): %.5f", player.degrees);
+		al_draw_textf(font, al_map_rgb(255,255,255), ScreenWidth-10, 12, ALLEGRO_ALIGN_RIGHT, "Degrees: %.5f", player.degrees);
 		//al_draw_textf(font, al_map_rgb(255,255,255), ScreenHeight-10*5, 22, ALLEGRO_ALIGN_RIGHT, "Degrees (with mouse): %.5f", acos((player.xmouse-player.x)/(player.ymouse-player.y)));
 		
 		al_flip_display();
