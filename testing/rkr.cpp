@@ -4,7 +4,7 @@
 #include <allegro5/allegro_font.h>
 #include <allegro5/allegro_ttf.h>
 #include <cmath>
-#include <iostream>
+#include <stdlib.h>
 
 
 #define ScreenWidth 640
@@ -12,7 +12,7 @@
 
 
 bool Collision(float x, float y, float w, float h, float ex, float ey, float ew, float eh);
-
+bool PixelCol(ALLEGRO_BITMAP player, ALLEGRO_BITMAP enemy, float x, float y, float w, float h, float ex, float ey, float ew, float eh);
 
 int main()
 {          
@@ -56,7 +56,7 @@ int main()
 
 	
 	ALLEGRO_BITMAP *fondo1 = al_load_bitmap("sprites/fondo1.png");
-	//al_convert_mask_to_alpha(player, al_map_rgb(255,255,255));
+	
 	
 	bool done = false;
 
@@ -75,6 +75,7 @@ int main()
 	}player;
 	
 	player.image = al_load_bitmap("sprites/player.png");
+	al_convert_mask_to_alpha(player.image, al_map_rgb(255,255,255));
 	player.x = ScreenWidth / 2;
 	player.y = ScreenHeight / 2;
 	player.moveSpeed = 3;
@@ -91,24 +92,24 @@ int main()
 	
 	
 	bala.image = al_load_bitmap("sprites/bullet.png");
-	bala.x = player.x+43;
-	bala.y = player.y+9;
+	bala.x = player.x+50;
+	bala.y = player.y+25;
 	
 	struct Enemigo
-    	{
+	{
             ALLEGRO_BITMAP *image;
             float x;
             float y;
             float velocidad_x;
             float velocidad_y;
-    }robot;
+	}robot;
 
-    robot.image = al_load_bitmap("sprites/enemigo.jpg");
-	//al_convert_mask_to_alpha(robot.image, al_map_rgb(255,255,255));
-    robot.x = 50;
-    robot.y = 50;
-    robot.velocidad_x = 1;
-    robot.velocidad_y = 1;
+	robot.image = al_load_bitmap("sprites/enemigo.jpg");
+	al_convert_mask_to_alpha(robot.image, al_map_rgb(255,255,255));
+	robot.x = 50;
+	robot.y = 50;
+	robot.velocidad_x = 0.23;
+	robot.velocidad_y = 0.23;
     
 	// -----------------------------------------------------------------
 
@@ -174,19 +175,20 @@ int main()
  		if(robot.y > player.y) robot.y -= robot.velocidad_y;
  		if(robot.y < player.y) robot.y += robot.velocidad_y;
 		
-		if(Collision(player.x, player.y, 50, 50, robot.x, robot.y, 34, 34)) player.alive = false;
+		//if(Collision(player.x, player.y, 50, 50, robot.x, robot.y, 34, 34)) player.alive = false;
+		if(PixelCol(player.image, robot.image, player.x, player.y, 50, 50, robot.x, robot.y, 34, 34)) player.alive = false;
 
 		al_clear_to_color(al_map_rgb(255, 255, 255));
-       	al_draw_scaled_bitmap(fondo1,0, 0, 256, 256, 0, 0, ScreenWidth, ScreenHeight, 0);
+		al_draw_scaled_bitmap(fondo1,0, 0, 256, 256, 0, 0, ScreenWidth, ScreenHeight, 0);
 		if(player.alive){
 			al_draw_rotated_bitmap(player.image, 25, 25, player.x, player.y, player.degrees, 0);
-			al_draw_rotated_bitmap(bala.image, 10, 20, player.x+5, player.y+5, player.degrees, 0);
-        }
-        al_draw_bitmap(robot.image, robot.x, robot.y, 0);
+			al_draw_rotated_bitmap(bala.image, 0, 0, player.x+5, player.y+5, player.degrees, 0);
+		}
+		al_draw_bitmap(robot.image, robot.x, robot.y, 0);
         	
-        al_draw_textf(font, al_map_rgb(255,255,255), ScreenWidth-10, 2, ALLEGRO_ALIGN_RIGHT, "Player x, y : %.1f %.1f", player.x, player.y);
-		al_draw_textf(font, al_map_rgb(255,255,255), ScreenWidth-10, 12, ALLEGRO_ALIGN_RIGHT, "Degrees: %.5f", player.degrees);
-		//al_draw_textf(font, al_map_rgb(255,255,255), ScreenHeight-10*5, 22, ALLEGRO_ALIGN_RIGHT, "Degrees (with mouse): %.5f", acos((player.xmouse-player.x)/(player.ymouse-player.y)));
+		al_draw_textf(font, al_map_rgb(255,255,255), ScreenWidth-10, 2, ALLEGRO_ALIGN_RIGHT, "Player x, y : %.1f %.1f", player.x, player.y);
+		al_draw_textf(font, al_map_rgb(255,255,255), ScreenWidth-10, 12, ALLEGRO_ALIGN_RIGHT, "Rotation (rad): %.5f", player.degrees);
+		al_draw_textf(font, al_map_rgb(255,255,255), ScreenWidth-10, 22, ALLEGRO_ALIGN_RIGHT, "Rotation (degrees): %.2f", (player.degrees*180)/ALLEGRO_PI);
 		
 		al_flip_display();
 		
@@ -215,7 +217,30 @@ bool Collision(float x, float y, float w, float h, float ex, float ey, float ew,
      //~ else
 		//~ return false;
 		
-	if(x+w < ex || x > ex + ew || y + h > ey || y > ey+eh)
+	if(x+w < ex || x > ex + ew || y + h < ey || y > ey+eh)
 		return false;
 	return true;
+}
+
+bool PixelCol(ALLEGRO_BITMAP *player, ALLEGRO_BITMAP *enemy, float x, float y, float w, float h, float ex, float ey, float ew, float eh)
+{
+	float top = fmax(y, ey);
+	float bottom = fmin(y + h, ey + eh);
+	float left = fmax(x, ex);
+	float right = fmin(x + w, ex + ew);
+	
+	for(int i = top; i < bottom; i++)
+	{
+		for(int j = left; j < right; j++)
+		{
+			al_lock_bitmap(player, al_get_bitmap_format(player), ALLEGRO_LOCK_READONLY);
+			al_lock_bitmap(enemy, al_get_bitmap_format(enemy), ALLEGRO_LOCK_READONLY);
+			ALLEGRO_COLOR color = al_get_pixel(player, j - x, i - y);
+			ALLEGRO_COLOR color2 = al_get_pixel(enemy, j - ex, i - ey);
+			
+			if(color.a != 0 && color2.a != 0)
+				return true;
+		}
+	}
+	return false;
 }
