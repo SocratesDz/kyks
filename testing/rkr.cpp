@@ -6,13 +6,15 @@
 #include <cmath>
 #include <stdlib.h>
 
+#include "data.h"
+
 
 #define ScreenWidth 640
 #define ScreenHeight 480
 
 
 bool Collision(float x, float y, float w, float h, float ex, float ey, float ew, float eh);
-bool PixelCol(ALLEGRO_BITMAP player, ALLEGRO_BITMAP enemy, float x, float y, float w, float h, float ex, float ey, float ew, float eh);
+bool PixelCol(ALLEGRO_BITMAP *player, ALLEGRO_BITMAP *enemy, float x, float y, float w, float h, float ex, float ey, float ew, float eh);
 
 int main()
 {          
@@ -28,10 +30,10 @@ int main()
 	ALLEGRO_DISPLAY *display = al_create_display(ScreenWidth, ScreenHeight);
 
 	// Pone la posición en la que debe salir la ventana
-	al_set_window_position(display, 0, 30);
+	//al_set_window_position(display, 0, 30);
 
 	// Pone el título de la ventana
-	al_set_window_title(display, "juego!");
+	al_set_window_title(display, "Rabbit Kills Robots");
 
 	if(!display)	// Si no se pudo crear la ventana, entonces pone un mensaje de error
 	{
@@ -62,18 +64,20 @@ int main()
 
 	// ---------Estructuras del juego-----------------------------------
 
-	struct Player
-	{
- 		ALLEGRO_BITMAP *image;
-		float x;
-		float y;
-		float moveSpeed;
-		float degrees;
-		bool alive;
-		float xmouse;
-		float ymouse;
-	}player;
-	
+	//~ struct Player
+	//~ {
+ 		//~ ALLEGRO_BITMAP *image;
+		//~ float x;
+		//~ float y;
+		//~ float moveSpeed;
+		//~ float degrees;
+		//~ int clip;
+		//~ bool alive;
+		//~ float xmouse;
+		//~ float ymouse;
+	//~ }player;
+
+	struct Player player;
 	player.image = al_load_bitmap("sprites/player.png");
 	al_convert_mask_to_alpha(player.image, al_map_rgb(255,255,255));
 	player.x = ScreenWidth / 2;
@@ -81,36 +85,74 @@ int main()
 	player.moveSpeed = 3;
 	player.degrees = -ALLEGRO_PI/2;
    	player.alive = true;
+   	player.clip = 6;
+   	
 
-	struct Bala
-	{
-	    ALLEGRO_BITMAP *image;
-	    float x;
-	    float y;
-
-	}bala;
+	//~ struct Bala
+	//~ {
+		//~ ALLEGRO_BITMAP *image;
+	    //~ float x;
+	    //~ float y;
+		//~ float dx;
+		//~ float dy;
+		//~ bool shot;
+		//~ void update();
+	//~ }bala;
+	
+	struct Bala bala;
+	//~ void Bala::update()
+	//~ {
+		//~ bala.dx = cosf(player.xmouse - player.x);
+		//~ bala.dy = senf(player.ymouse - player.y);
+		//~ 
+		//~ if(bala.shot){
+			//~ 
+			//~ bala.x += bala.dx;
+			//~ bala.y += bala.dy;
+			//~ }
+		//~ 
+	//~ }
 	
 	
 	bala.image = al_load_bitmap("sprites/bullet.png");
 	bala.x = player.x+50;
 	bala.y = player.y+25;
+	bala.shot = false;
 	
-	struct Enemigo
-	{
-            ALLEGRO_BITMAP *image;
-            float x;
-            float y;
-            float velocidad_x;
-            float velocidad_y;
-	}robot;
+	
+	
+	//~ struct Enemigo
+	//~ {
+		//~ ALLEGRO_BITMAP *image;
+        //~ float x;
+        //~ float y;
+        //~ float velocidad_x;
+        //~ float velocidad_y;
+        //~ //float degrees;
+	//~ }robot;
 
-	robot.image = al_load_bitmap("sprites/enemigo.jpg");
-	al_convert_mask_to_alpha(robot.image, al_map_rgb(255,255,255));
+	struct Enemigo robot;
+	robot.image = al_load_bitmap("sprites/Robot_sprites.png");
+	//al_convert_mask_to_alpha(robot.image, al_map_rgb(255,255,255));
 	robot.x = 50;
 	robot.y = 50;
 	robot.velocidad_x = 0.23;
 	robot.velocidad_y = 0.23;
-    
+	
+	//~ struct Weapon
+	//~ {
+		//~ struct Bala bullets[player.clip];
+		//~ void recargar();
+	//~ }arma;
+	//~ 
+	//~ void Weapon::recargar()
+	//~ {
+		//~ for(int i = 0; i < player.clip; i++)
+		//~ {
+			//~ bullets[i] = bala;
+		//~ }
+	//~ }
+    //~ 
 	// -----------------------------------------------------------------
 
 	ALLEGRO_MOUSE_STATE mouseState;
@@ -167,9 +209,13 @@ int main()
 					
 		}
 		
+		// Esto permite que el jugador se mueva con el mouse
 		player.degrees = atan2((player.ymouse-player.y),(player.xmouse-player.x));
-				
 		
+		// Trabajando con las balas
+		
+				
+		// La Inteligencia Artificial del enemigo
  		if(robot.x < player.x) robot.x += robot.velocidad_x;
  		if(robot.x > player.x) robot.x -= robot.velocidad_x;
  		if(robot.y > player.y) robot.y -= robot.velocidad_y;
@@ -184,7 +230,7 @@ int main()
 			al_draw_rotated_bitmap(player.image, 25, 25, player.x, player.y, player.degrees, 0);
 			al_draw_rotated_bitmap(bala.image, 0, 0, player.x+5, player.y+5, player.degrees, 0);
 		}
-		al_draw_bitmap(robot.image, robot.x, robot.y, 0);
+		al_draw_bitmap_region(robot.image, 0, 0, 60, 52, robot.x, robot.y, 0);
         	
 		al_draw_textf(font, al_map_rgb(255,255,255), ScreenWidth-10, 2, ALLEGRO_ALIGN_RIGHT, "Player x, y : %.1f %.1f", player.x, player.y);
 		al_draw_textf(font, al_map_rgb(255,255,255), ScreenWidth-10, 12, ALLEGRO_ALIGN_RIGHT, "Rotation (rad): %.5f", player.degrees);
@@ -199,6 +245,7 @@ int main()
 	
 	al_destroy_font(font);
 	al_destroy_bitmap(fondo1);
+	al_destroy_bitmap(robot.image);
 	al_destroy_display(display);
 	al_destroy_event_queue(event_queue);
 	al_destroy_bitmap(player.image);
