@@ -6,6 +6,8 @@ struct Player
  	ALLEGRO_BITMAP *image;
 	float x;
 	float y;
+	float w;
+	float h;
 	float moveSpeed;
 	float degrees;
 	int clip;
@@ -23,7 +25,7 @@ struct Bala
 	float dy;
 	bool shot;
 	void update();
-};
+}bala;
 	
 //~ void Bala::update()
 //~ {
@@ -46,18 +48,20 @@ struct Enemigo
         float velocidad_x;
         float velocidad_y;
         //float degrees;
+        float w;
+        float h;
 };
 
-//~ struct Weapon
-	//~ {
-		//~ struct Bala bullets[player.clip];
-		//~ void recargar();
-//~ };
+struct Weapon
+	{
+		struct Bala bullets[6];
+		void recargar();
+};
 	
-//~ void Weapon::recargar()
-//~ {
-	//~ for(int i = 0; i < player.clip; i++)
-	//~ {
-			//~ bullets[i] = bala;
-	//~ }
-//~ }
+void Weapon::recargar()
+{
+	for(int i = 0; i < 6; i++)
+	{
+			bullets[i] = bala;
+	}
+}
