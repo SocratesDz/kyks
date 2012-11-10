@@ -5,7 +5,6 @@
 #include <allegro5/allegro_ttf.h>
 #include <allegro5/allegro_primitives.h>
 #include <cmath>
-#include <stdlib.h>
 
 #include "data.h"
 
@@ -30,11 +29,11 @@ int main()
 	al_set_new_display_flags(ALLEGRO_WINDOWED); // Pone la ventana en modo Windowed
 	ALLEGRO_DISPLAY *display = al_create_display(ScreenWidth, ScreenHeight);
 
-	// Pone la posición en la que debe salir la ventana
+	// Pone la posición en la que debe salir l`a ventana
 	//al_set_window_position(display, 0, 30);
 
 	// Pone el título de la ventana
-	al_set_window_title(display, "Rabbit Kills Robots");
+	al_set_window_title(display, "Killer Bunny");
 
 	if(!display)	// Si no se pudo crear la ventana, entonces pone un mensaje de error
 	{
@@ -66,19 +65,6 @@ int main()
 
 	// ---------Estructuras del juego-----------------------------------
 
-	//~ struct Player
-	//~ {
- 		//~ ALLEGRO_BITMAP *image;
-		//~ float x;
-		//~ float y;
-		//~ float moveSpeed;
-		//~ float degrees;
-		//~ int clip;
-		//~ bool alive;
-		//~ float xmouse;
-		//~ float ymouse;
-	//~ }player;
-
 	struct Player player;
 	player.image = al_load_bitmap("sprites/player.png");
 	al_convert_mask_to_alpha(player.image, al_map_rgb(255,255,255));
@@ -90,18 +76,8 @@ int main()
 	player.degrees = -ALLEGRO_PI/2;
    	player.alive = true;
    	player.clip = 6;
-   	
+   	player.vida = 100;
 
-	//~ struct Bala
-	//~ {
-		//~ ALLEGRO_BITMAP *image;
-	    //~ float x;
-	    //~ float y;
-		//~ float dx;
-		//~ float dy;
-		//~ bool shot;
-		//~ void update();
-	//~ }bala;
 	
 	struct Bala bala;
 	
@@ -122,20 +98,12 @@ int main()
 	bala.x = player.x+50;
 	bala.y = player.y+25;
 	bala.shot = false;
-
 	
-	//~ struct Enemigo
-	//~ {
-		//~ ALLEGRO_BITMAP *image;
-        //~ float x;
-        //~ float y;
-        //~ float velocidad_x;
-        //~ float velocidad_y;
-        //~ //float degrees;
-	//~ }robot;
-
+	
 	struct Enemigo robot;
 	robot.image = al_load_bitmap("sprites/Robot_sprites.png");
+	robot.death = al_load_bitmap("sprites/explosiondelrobot.png");
+	al_convert_mask_to_alpha(robot.death, al_map_rgb(255, 255, 255));
 	//al_convert_mask_to_alpha(robot.image, al_map_rgb(255,255,255));
 	robot.x = 50;
 	robot.y = 50;
@@ -143,6 +111,8 @@ int main()
 	robot.h = al_get_bitmap_height(robot.image);
 	robot.velocidad_x = 0.23;
 	robot.velocidad_y = 0.23;
+	robot.fuerza= 0.5;
+	robot.vida=50;
 	
 	//~ void Weapon::recargar()
 	//~ {
@@ -151,23 +121,7 @@ int main()
 			//~ bullets[i] = bala;
 		//~ }
 	//~ }
-
-		
-	//~ struct Weapon
-	//~ {
-		//~ struct Bala bullets[player.clip];
-		//~ void recargar();
-	//~ }arma;
-	//~ 
-	//~ void Weapon::recargar()
-	//~ {
-		//~ for(int i = 0; i < player.clip; i++)
-		//~ {
-			//~ bullets[i] = bala;
-		//~ }
-	//~ }
-    //~ 
-    
+	
 	// -----------------------------------------------------------------
 
 	// Esta variable guardará los eventos del mouse
@@ -224,6 +178,11 @@ int main()
 			{
 				player.y += player.moveSpeed;
 			}
+			// Mata al robot
+			if(al_key_down(&keyState, ALLEGRO_KEY_K))
+			{
+                robot.vida -= 10;
+            }
 					
 		}
 		
@@ -231,14 +190,22 @@ int main()
 		player.degrees = atan2((player.ymouse-player.y),(player.xmouse-player.x));
 					
 		// La Inteligencia Artificial del enemigo
- 		if(robot.x < player.x-25) robot.x += robot.velocidad_x;
- 		if(robot.x > player.x-25) robot.x -= robot.velocidad_x;
- 		if(robot.y > player.y-25) robot.y -= robot.velocidad_y;
- 		if(robot.y < player.y-25) robot.y += robot.velocidad_y;
-		
+		if(robot.alive && player.alive){
+			if(robot.x < player.x) robot.x += robot.velocidad_x;
+			if(robot.x > player.x) robot.x -= robot.velocidad_x;
+			if(robot.y > player.y) robot.y -= robot.velocidad_y;
+			if(robot.y < player.y) robot.y += robot.velocidad_y;
+		}
 		// Uso de las funciones para las colisiones
 		//if(Collision(player.x, player.y, 50, 50, robot.x, robot.y, 34, 34)) player.alive = false;
-		if(PixelCol(player.image, robot.image, player.x-(player.w/2), player.y-(player.h/2), player.w, player.h, robot.x, robot.y, robot.w/7, robot.h)) player.alive = false;
+		if(PixelCol(player.image, robot.image, player.x-(player.w/2), player.y-(player.h/2), player.w, player.h, robot.x, robot.y, robot.w/7, robot.h)) player.vida -= robot.fuerza;
+
+		if(player.vida==0) player.alive = false;
+		
+		if(robot.vida<=0){
+			robot.vida = 0;
+			robot.alive = false;
+		}
 
 		al_clear_to_color(al_map_rgb(255, 255, 255));	// Se pinta todo a negro
 		al_draw_scaled_bitmap(fondo1,0, 0, 256, 256, 0, 0, ScreenWidth, ScreenHeight, 0);	// Se dibuja el fondo
@@ -246,8 +213,15 @@ int main()
 			al_draw_rotated_bitmap(player.image, 25, 25, player.x, player.y, player.degrees, 0); // Dibujo el jugador
 			al_draw_rotated_bitmap(bala.image, 0, 0, player.x+5, player.y+5, player.degrees, 0); // Dibujo la bala (esto hay que quitarlo)
 		}
-		al_draw_bitmap_region(robot.image, 0, 0, 60, 52, robot.x, robot.y, 0); // Dibujo el robot
-        
+		if(robot.alive){
+			al_draw_bitmap_region(robot.image, 0, 0, 60, 52, robot.x, robot.y, 0); // Dibujo el robot
+			}
+		else
+		{
+			robot.w = al_get_bitmap_width(robot.death);
+			robot.h = al_get_bitmap_width(robot.death);
+			al_draw_bitmap_region(robot.death, 0, 0, robot.w/4, robot.h, robot.x, robot.y, 0);
+        }
         
         // Esto es para el debugging
         
@@ -259,6 +233,9 @@ int main()
 		al_draw_textf(font, al_map_rgb(255,255,255), ScreenWidth-10, 2, ALLEGRO_ALIGN_RIGHT, "Player x, y : %.1f %.1f", player.x, player.y);
 		al_draw_textf(font, al_map_rgb(255,255,255), ScreenWidth-10, 12, ALLEGRO_ALIGN_RIGHT, "Rotation (rad): %.5f", player.degrees);
 		al_draw_textf(font, al_map_rgb(255,255,255), ScreenWidth-10, 22, ALLEGRO_ALIGN_RIGHT, "Rotation (degrees): %.2f", (player.degrees*180)/ALLEGRO_PI);
+		
+		// Status bar
+		al_draw_filled_rectangle(0,0,player.vida*2,15, al_map_rgb(0,255,0));
 		
 		// Actualizo la pantalla (flip)
 		al_flip_display();

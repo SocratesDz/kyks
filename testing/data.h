@@ -14,6 +14,7 @@ struct Player
 	bool alive;
 	float xmouse;
 	float ymouse;
+	float vida;
 };
 
 struct Bala
@@ -43,6 +44,7 @@ struct Bala
 struct Enemigo
 	{
 		ALLEGRO_BITMAP *image;
+		ALLEGRO_BITMAP *death;
         float x;
         float y;
         float velocidad_x;
@@ -50,6 +52,10 @@ struct Enemigo
         //float degrees;
         float w;
         float h;
+        float vida;
+        bool alive;
+        float fuerza;
+        
 };
 
 struct Weapon
